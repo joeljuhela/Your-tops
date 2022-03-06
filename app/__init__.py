@@ -2,7 +2,7 @@ import os
 from app.auth import auth_bp
 from flask import Flask, redirect, request, render_template, url_for
 
-from settings import ACCESS_TOKEN_COOKIE
+from config import ACCESS_TOKEN_COOKIE
 from api import SpotifyAPI
 from app.utils import access_token_required
 from app.forms import SpotifyTimeSearchForm
