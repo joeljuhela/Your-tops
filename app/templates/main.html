@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="center">
+        <h2>Spotify Get Top Items</h2>
+        <h4>Welcome {{ user }}!</h4>
+        <a href="{{ url_for('auth_bp.logout') }}" class="button">Logout</a>
+    </div>
+
+    <form method="post">
+        <div class="row">
+            <div class="column">
+                {{ form.top_type.label }}
+                {{ form.top_type }}
+            </div>
+            <div class="column">
+                {{ form.time_range.label }}
+                {{ form.time_range }}
+            </div>
+        </div>
+        <input type="submit" value="Get top items" class="button">
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                {% if top_type == 'tracks' %}
+                    <th>Title</th>
+                    <th>Album</th>
+                    <th>Length</th>
+                {% elif top_type == 'artists' %}
+                    <th>Artist</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% if top_items %}
+                {% if top_type == "tracks" %}
+                    {% for item in top_items %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="track-title">
+                                <img src="{{ item.album.images[2].url }}" alt="{{ item.album.name }}">
+                                <div>
+                                    <p class="title">{{ item.name }}</p>
+                                    <p class="artist">
+                                        {% for artist in item.artists %}
+                                            {{ artist.name }}
+                                        {% endfor %}
+                                    </p>
+                                </div>
+                            </td>
+                            <td>
+                                {{ item.album.name }}
+                            </td>
+                            <td>
+                                {{ item.duration_ms | humanize_ms }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% elif top_type == 'artists' %}
+                    {% for item in top_items %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td class="artist-title">
+                                <img src="{{ item.images[2].url }}" alt="{{ item.name }}">
+                                <p>{{ item.name }}</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td class="no-items">
+                        Click "GET TOP ITEMS" to see results
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% endblock %}

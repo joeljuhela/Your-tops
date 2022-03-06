@@ -6,6 +6,8 @@ from requests.auth import HTTPBasicAuth
 from datetime import date
 from cover.image import create_recaman_image
 
+from settings import CLIENT_ID, CLIENT_SECRET, SPOTIFY_API_URL
+
 
 class BearerAuth(requests.auth.AuthBase):
     def __init__(self, access_token):
@@ -17,53 +19,39 @@ class BearerAuth(requests.auth.AuthBase):
 
 
 class SpotifyAPI:
-    def __init__(self, refresh_token, client_id, client_secret, api_url):
-        self.refresh_token = refresh_token
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.api_url = api_url
+    def __init__(self, access_token):
+        self.client_id = CLIENT_ID
+        self.client_secret = CLIENT_SECRET
+        self.api_url = SPOTIFY_API_URL
+        self.access_token = access_token
 
-        self.access_token = self.get_access_token()
-
-    def get_access_token(self):
-        """Gets access token for the user"""
-        r = requests.post(
-            "https://accounts.spotify.com/api/token",
-            auth=HTTPBasicAuth(self.client_id, self.client_secret),
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": self.refresh_token
-            }
-        )
-
-        if r.status_code == 200:
-            body = r.json()
-            print("Get Access Token")
-            return body['access_token']
-
-    def get_top_tracks_uris(self):
-        """Gets the users top tracks of the last 4 weeks"""
+    def get_user_top_items(self, top_type, time_range):
+        """
+        Gets users top items, for options of top_type and time_range, see
+        https://developer.spotify.com/console/get-current-user-top-artists-and-tracks/
+        """
         r = requests.get(
-            f"{self.api_url}/me/top/tracks",
+            f"{self.api_url}/me/top/{top_type}",
             auth=BearerAuth(self.access_token),
             params={
                 "limit": 30,
-                "time_range": "short_term"
+                "time_range": time_range
             }
         )
-
         if r.status_code == 200:
             body = r.json()
-            track_items = body['items']
-            track_uris = [x['uri'] for x in track_items]
-            print("Get Track URIs")
-            return track_uris
-        elif r.status_code == 401:
-            self.access_token = self.get_access_token()
-            self.get_top_tracks_uris()
+            return body['items']
+        else:
+            print('Failed to get items')
 
-    def get_user_id(self):
-        """Gets the Spotify ID of the user"""
+    def get_top_tracks_uris(self):
+        """Gets the users top tracks of the last 4 weeks"""
+        tracks = self.get_user_top_items("tracks", "short_term")
+        uris = [x['uri'] for x in tracks]
+        return uris
+
+    def get_user(self):
+        """Gets the Spotify User associated with the access token"""
         r = requests.get(
             f"{self.api_url}/me",
             auth=BearerAuth(self.access_token)
@@ -71,12 +59,10 @@ class SpotifyAPI:
 
         if r.status_code == 200:
             body = r.json()
-            user_id = body['id']
-            print("Get User ID")
-            return user_id
+            print("Get User")
+            return body
         elif r.status_code == 401:
-            self.access_token = self.get_access_token
-            self.get_user_id()
+            print("Failed to get User Id")
 
     def create_playlist(self, user_id):
         """Creates a new private playlist and returns the id"""
@@ -98,8 +84,7 @@ class SpotifyAPI:
             print("Create a new playlist")
             return playlist_id
         elif r.status_code == 401:
-            self.access_token = self.get_access_token()
-            self.create_playlist(user_id)
+            print("Failed to create a playlist")
 
     def add_tracks_to_playlist(self, playlist_id, track_uris):
         """Adds tracks to a playlist"""
@@ -110,8 +95,7 @@ class SpotifyAPI:
         )
 
         if r.status_code == 401:
-            self.access_token = self.get_access_token()
-            self.add_tracks_to_playlist(playlist_id, track_uris)
+            print("Failed to add tracks to playlist")
         else:
             print("Add tracks to playlist")
 
@@ -130,15 +114,33 @@ class SpotifyAPI:
         buf.close()
 
         if r.status_code == 401:
-            self.access_token = self.get_access_token()
-            self.add_playlist_image(playlist_id)
+            print('Failed to Add Playlist Image')
+        else:
+            print('Add Playlist Image')
 
     def create_monthly_top_list(self):
         top_tracks_uris = self.get_top_tracks_uris()
-        user_id = self.get_user_id()
-        playlist_id = self.create_playlist(user_id)
+        user = self.get_user()
+        playlist_id = self.create_playlist(user['id'])
         self.add_playlist_image(playlist_id)
         self.add_tracks_to_playlist(playlist_id, top_tracks_uris)
+
+
+def get_access_token(refresh_token):
+    """Gets access token for the user"""
+    r = requests.post(
+        "https://accounts.spotify.com/api/token",
+        auth=HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET),
+        data={
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token
+        }
+    )
+
+    if r.status_code == 200:
+        body = r.json()
+        print("Get Access Token")
+        return body['access_token']
 
 
 if __name__ == '__main__':
@@ -146,9 +148,8 @@ if __name__ == '__main__':
         config = json.load(f)
 
     for token in config["tokens"]:
+        user_access_token = get_access_token(token['refresh_token'])
+
         SpotifyAPI(
-            token["refresh_token"],
-            config['client_id'],
-            config['client_secret'],
-            config['spotify_api_url']
+            user_access_token,
         ).create_monthly_top_list()

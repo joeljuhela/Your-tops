@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Normalize -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/1.1.0/modern-normalize.min.css">
+    <!-- Milligram -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <!-- Own Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='scss/main.css') }}">
+    <meta charset="UTF-8">
+    <title>{% block title %}Your Tops{% endblock %}</title>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
