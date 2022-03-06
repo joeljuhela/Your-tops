@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import redirect, url_for, request
 
-from settings import ACCESS_TOKEN_COOKIE
+from config import ACCESS_TOKEN_COOKIE
 
 
 def access_token_required(func):
