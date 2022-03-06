@@ -1,6 +1,6 @@
 import os
 from app.auth import auth_bp
-from flask import Flask, redirect, request, render_template, url_for
+from flask import Flask, request, render_template
 
 from config import ACCESS_TOKEN_COOKIE
 from api import SpotifyAPI

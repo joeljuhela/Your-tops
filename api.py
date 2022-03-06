@@ -6,7 +6,7 @@ from requests.auth import HTTPBasicAuth
 from datetime import date
 from cover.image import create_recaman_image
 
-from settings import CLIENT_ID, CLIENT_SECRET, SPOTIFY_API_URL
+from config import CLIENT_ID, CLIENT_SECRET, SPOTIFY_API_URL
 
 
 class BearerAuth(requests.auth.AuthBase):
