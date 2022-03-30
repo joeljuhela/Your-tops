@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="center">
+        <h1>Welcome to Your Tops!</h1>
+        <p>Login to use the service</p>
+        <a href="{{ url_for('auth_bp.spotify_login') }}" class="button">
+            Login with your Spotify Account
+        </a>
+    </div>
+{% endblock %}

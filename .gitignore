@@ -1,4 +1,7 @@
 .idea/
 config.json
+config.py
 .DS_Store
 __pycache__/
+*.css.map
+*.css

@@ -1,0 +1,42 @@
+.container {
+  padding-top: 7.5rem;
+}
+
+.center {
+  text-align:center;
+}
+
+.track-title {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .title {
+    font-weight: bold;
+  }
+
+  .artist {
+    font-size: 0.8em;
+  }
+}
+
+.artist-title {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+
+  p {
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+}
+
+.no-items {
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
